@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name               YouTube Auto HD and FPS
+// @name               YouTube Auto HD (1440p Max)
 // @namespace          https://github.com/jlhg/youtube-auto-hd
 // @license            GPL-3.0
-// @version            0.1.0
-// @description        Auto select the highest quality on YouTube
-// @description:zh-TW  YouTube 自動選最高畫質
+// @version            0.1.1
+// @description        Auto select up to 1440p quality on YouTube
+// @description:zh-TW  YouTube 自動選最高 1440p 畫質
 // @author             jlhg
 // @homepage           https://github.com/jlhg/youtube-auto-hd
 // @supportURL         https://github.com/jlhg/youtube-auto-hd/issues
@@ -34,7 +34,8 @@
   const SUFFIX_EBR = 'ebr';
 
   const fpsSupported = [60, 50, 30];
-  const qualities = [4320, 2160, 1440, 1080, 720, 480, 360, 240, 144];
+  // Updated: Set 1440p as the maximum preferred quality.
+  const qualities = [1440, 1080, 720, 480, 360, 240, 144];
 
   function isElementVisible(element) {
     return element?.offsetWidth > 0 && element?.offsetHeight > 0;
@@ -105,8 +106,6 @@
 
     const elQualityName = elOptionInSettings.querySelector(SELECTORS.menuOptionContent);
 
-    // If the video is a channel trailer, the last option is initially the speed one,
-    // and the speed setting can only be a single digit
     const matchNumber = elQualityName?.textContent?.match(/\d+/);
     if (!matchNumber) {
       return false;
@@ -141,8 +140,9 @@
       return;
     }
 
-    const iQualityFallback = qualitiesAvailable.findIndex(quality => !quality.toString().endsWith(SUFFIX_EBR));
-    applyQuality(iQualityFallback);
+    // Find the best quality that matches the desired range
+    const preferredQualityIndex = qualitiesAvailable.findIndex(quality => qualities.includes(quality));
+    applyQuality(preferredQualityIndex >= 0 ? preferredQualityIndex : 0);
   }
 
   async function changeQualityWhenPossible(elVideo) {
